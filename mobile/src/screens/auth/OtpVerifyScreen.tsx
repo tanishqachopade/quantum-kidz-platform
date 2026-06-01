@@ -13,18 +13,16 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 
-import { COLORS } from "../../constants/colors";
-
 const ROLE_ROUTES: Record<string, string> = {
-  PARENT:      "ParentHome",
-  TEACHER:     "TeacherHome",
+  PARENT: "ParentHome",
+  TEACHER: "TeacherHome",
   BRANCH_HEAD: "BranchHeadHome",
   SUPER_ADMIN: "SuperAdminHome",
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  PARENT:      "Parent",
-  TEACHER:     "Teacher",
+  PARENT: "Parent",
+  TEACHER: "Teacher",
   BRANCH_HEAD: "Branch Head",
   SUPER_ADMIN: "Super Admin",
 };
@@ -34,25 +32,35 @@ export default function OtpVerifyScreen({ route, navigation }: any) {
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputs = useRef<Array<TextInput | null>>([]);
+
   const filledCount = otp.filter(Boolean).length;
 
   const handleChange = (val: string, index: number) => {
     if (!/^\d*$/.test(val)) return;
+
     const updated = [...otp];
     updated[index] = val.slice(-1);
+
     setOtp(updated);
-    if (val && index < 5) inputs.current[index + 1]?.focus();
+
+    if (val && index < 5) {
+      inputs.current[index + 1]?.focus();
+    }
   };
 
   const handleKeyPress = (e: any, index: number) => {
-    if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
+    if (
+      e.nativeEvent.key === "Backspace" &&
+      !otp[index] &&
+      index > 0
+    ) {
       inputs.current[index - 1]?.focus();
     }
   };
 
   const handleVerify = () => {
-    // 🚧 DEV MODE: any 6 digits works, routes by role
     const destination = ROLE_ROUTES[role];
+
     navigation.reset({
       index: 0,
       routes: [{ name: destination }],
@@ -66,241 +74,308 @@ export default function OtpVerifyScreen({ route, navigation }: any) {
     >
       <StatusBar style="light" />
 
-      {/* Header */}
-      <LinearGradient colors={["#5CC8FF", "#1a90d8"]} style={styles.topBg}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+      <LinearGradient
+        colors={["#5CC8FF", "#1A90D8"]}
+        style={styles.container}
+      >
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
+
         <Image
           source={require("../../assets/images/logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
-      </LinearGradient>
 
-      {/* Card */}
-      <View style={styles.card}>
-
-        <View style={styles.iconCircle}>
-          <Text style={{ fontSize: 26 }}>📱</Text>
-        </View>
-
-        <Text style={styles.heading}>Verify your number</Text>
-
-        <Text style={styles.subheading}>
-          Code sent to{" "}
-          <Text style={styles.phoneHighlight}>+91 {phone}</Text>
-          {"\n"}
-          <Text style={styles.roleChip}>
-            Signing in as {ROLE_LABELS[role]}
-          </Text>
+        <Text style={styles.smallLabel}>
+          VERIFY NUMBER
         </Text>
 
-        {/* OTP boxes */}
-        <View style={styles.otpRow}>
-          {otp.map((digit, i) => (
-            <TextInput
-              key={i}
-              ref={(ref) => (inputs.current[i] = ref)}
-              style={[
-                styles.otpBox,
-                digit       ? styles.otpBoxFilled : {},
-                i === filledCount && filledCount < 6 ? styles.otpBoxActive : {},
-              ]}
-              value={digit}
-              onChangeText={(val) => handleChange(val, i)}
-              onKeyPress={(e) => handleKeyPress(e, i)}
-              keyboardType="number-pad"
-              maxLength={1}
-              selectTextOnFocus
-              caretHidden
-            />
-          ))}
+        <Text style={styles.heroTitle}>
+          One quick step{"\n"}
+          and you're in!
+        </Text>
+
+        <View style={styles.phoneCard}>
+          <Text style={styles.phoneEmoji}>📱</Text>
+
+          <View>
+            <Text style={styles.phoneNumber}>
+              +91 {phone}
+            </Text>
+
+            <Text style={styles.phoneRole}>
+              Signing in as {ROLE_LABELS[role]}
+            </Text>
+          </View>
         </View>
 
-        {/* Dev hint */}
-        <View style={styles.devBadge}>
-          <Text style={styles.devText}>🚧 Dev mode — any 6 digits works</Text>
-        </View>
+        <View style={styles.otpCard}>
+          <Text style={styles.codeLabel}>
+            ENTER 6-DIGIT CODE
+          </Text>
 
-        {/* Verify button */}
-        <Pressable
-          style={[styles.verifyBtn, filledCount < 6 && styles.verifyBtnDisabled]}
-          onPress={handleVerify}
-          disabled={filledCount < 6}
-        >
-          <Text style={styles.verifyBtnText}>Verify & Continue ✓</Text>
-        </Pressable>
+          <View style={styles.otpRow}>
+            {otp.map((digit, i) => (
+              <TextInput
+                key={i}
+                ref={(ref) => (inputs.current[i] = ref)}
+                style={[
+                  styles.otpBox,
+                  digit
+                    ? styles.otpBoxFilled
+                    : {},
+                  i === filledCount &&
+                  filledCount < 6
+                    ? styles.otpBoxActive
+                    : {},
+                ]}
+                value={digit}
+                onChangeText={(val) =>
+                  handleChange(val, i)
+                }
+                onKeyPress={(e) =>
+                  handleKeyPress(e, i)
+                }
+                keyboardType="number-pad"
+                maxLength={1}
+                selectTextOnFocus
+                caretHidden
+              />
+            ))}
+          </View>
 
-        {/* Resend (UI only) */}
-        <View style={styles.resendRow}>
-          <Text style={styles.resendLabel}>Didn't get a code? </Text>
-          <TouchableOpacity>
-            <Text style={styles.resendLink}>Resend OTP</Text>
+          <View style={styles.devBadge}>
+            <Text style={styles.devText}>
+              🚧 Dev Mode — Any 6 Digits Work
+            </Text>
+          </View>
+
+          <Pressable
+            style={[
+              styles.verifyBtn,
+              filledCount < 6 &&
+                styles.verifyBtnDisabled,
+            ]}
+            disabled={filledCount < 6}
+            onPress={handleVerify}
+          >
+            <Text style={styles.verifyBtnText}>
+              Verify & Continue
+            </Text>
+          </Pressable>
+
+          <View style={styles.resendRow}>
+            <Text style={styles.resendLabel}>
+              Didn't get a code?
+            </Text>
+
+            <TouchableOpacity>
+              <Text style={styles.resendLink}>
+                Resend OTP
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.changeNumber}>
+              ✏️ Wrong number? Change it
+            </Text>
           </TouchableOpacity>
         </View>
-
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.wrongNumber}>✏️ Wrong number? Change it</Text>
-        </TouchableOpacity>
 
         <Image
           source={require("../../assets/images/both_mascots.png")}
           style={styles.mascots}
           resizeMode="contain"
         />
-
-      </View>
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  topBg: {
-    height: 160,
-    alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: 20,
-    position: "relative",
-    overflow: "hidden",
-  },
-  backBtn: {
-    position: "absolute",
-    top: 52,
-    left: 20,
-  },
-  backText: {
-    color: "rgba(255,255,255,0.9)",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  logo: {
-    width: 180,
-    height: 72,
-  },
-
-  card: {
+  container: {
     flex: 1,
-    backgroundColor: "#f0f7ff",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -20,
-    padding: 28,
-    paddingTop: 24,
-    alignItems: "center",
-    gap: 14,
+    paddingTop: 60,
+    paddingHorizontal: 24,
   },
 
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#e8f4ff",
-    alignItems: "center",
-    justifyContent: "center",
+  backBtn: {
+    marginBottom: 12,
   },
-  heading: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: "#1a2332",
-    letterSpacing: -0.3,
-  },
-  subheading: {
-    fontSize: 14,
-    color: "#6b8baa",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  phoneHighlight: {
-    fontWeight: "800",
-    color: "#1a5fa8",
+
+  backText: {
+    color: "#ffffff",
     fontSize: 15,
-  },
-  roleChip: {
-    fontSize: 12,
     fontWeight: "700",
-    color: "#f4921e",
+  },
+
+  logo: {
+    width: 220,
+    height: 90,
+    alignSelf: "center",
+    marginBottom: 10,
+  },
+
+  smallLabel: {
+    color: "#D9F2FF",
+    fontSize: 12,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+  },
+
+  heroTitle: {
+    color: "#FFFFFF",
+    fontSize: 38,
+    lineHeight: 42,
+    fontWeight: "900",
+    marginTop: 8,
+    marginBottom: 24,
+  },
+
+  phoneCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderRadius: 20,
+    marginBottom: 24,
+  },
+
+  phoneEmoji: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+
+  phoneNumber: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "800",
+  },
+
+  phoneRole: {
+    color: "#EAF8FF",
+    fontSize: 13,
+    marginTop: 2,
+  },
+
+  otpCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 28,
+    padding: 22,
+  },
+
+  codeLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#7CA0C5",
+    letterSpacing: 1,
+    marginBottom: 18,
   },
 
   otpRow: {
     flexDirection: "row",
-    gap: 10,
-    marginVertical: 4,
+    justifyContent: "space-between",
   },
+
   otpBox: {
-    width: 44,
-    height: 54,
-    borderRadius: 14,
-    backgroundColor: "#fff",
+    width: 48,
+    height: 64,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#c9dff5",
+    borderColor: "#C9DFF5",
     textAlign: "center",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "900",
-    color: "#1a2332",
+    color: "#1A2332",
   },
+
   otpBoxFilled: {
-    borderColor: "#1a5fa8",
-    backgroundColor: "#e8f4ff",
+    backgroundColor: "#E8F4FF",
+    borderColor: "#1A5FA8",
   },
+
   otpBoxActive: {
-    borderColor: "#29B6F6",
     borderWidth: 2,
+    borderColor: "#29B6F6",
   },
 
   devBadge: {
-    backgroundColor: "#fff8e0",
+    backgroundColor: "#FFF8E0",
+    borderColor: "#FFD580",
+    borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: "#ffd580",
+    paddingVertical: 7,
+    alignSelf: "center",
+    marginTop: 18,
   },
+
   devText: {
     fontSize: 11,
-    color: "#b07010",
     fontWeight: "700",
+    color: "#B07010",
   },
 
   verifyBtn: {
-    backgroundColor: "#f4921e",
-    borderRadius: 16,
-    paddingVertical: 15,
-    width: "100%",
+    backgroundColor: "#F4921E",
+    borderRadius: 18,
+    paddingVertical: 18,
     alignItems: "center",
+    marginTop: 20,
   },
+
   verifyBtnDisabled: {
     opacity: 0.45,
   },
+
   verifyBtnText: {
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "900",
-    color: "#fff",
   },
 
   resendRow: {
     flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 18,
   },
+
   resendLabel: {
+    color: "#8AABCA",
     fontSize: 13,
-    color: "#8aabca",
     fontWeight: "600",
   },
+
   resendLink: {
+    color: "#F4921E",
     fontSize: 13,
     fontWeight: "800",
-    color: "#f4921e",
+    marginLeft: 4,
   },
-  wrongNumber: {
+
+  changeNumber: {
+    marginTop: 14,
+    textAlign: "center",
+    color: "#8AABCA",
     fontSize: 12,
-    color: "#8aabca",
     fontWeight: "600",
   },
 
   mascots: {
-    width: 160,
-    height: 130,
+    width: 230,
+    height: 180,
+    alignSelf: "center",
     marginTop: "auto",
+    marginBottom: 10,
   },
 });
