@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  BRANCH_HEAD
+  TEACHER
+  PARENT
+}
+
+enum BoardType {
+  QUANTUM
+  BRANCH
+  CLASS
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String   @unique
+
+  classes   Class[]
+  boards    Board[]
+  users     User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id])
+
+  boards    Board[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Board {
+  id        String   @id @default(cuid())
+
+  title     String
+
+  type      BoardType
+
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+
+  classId   String?
+  class     Class?   @relation(fields: [classId], references: [id])
+
+  posts     Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id          String   @id @default(cuid())
+
+  phone       String   @unique
+
+  role        UserRole
+
+  fullName    String?
+
+  isApproved  Boolean  @default(false)
+
+  branchId    String?
+  branch      Branch?  @relation(fields: [branchId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+
+  title     String
+
+  content   String
+
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id])
+
+  authorId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
