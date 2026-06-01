@@ -29,6 +29,19 @@ export const createBranch = async (
   try {
     const { name } = req.body;
 
+    const existingBranch =
+      await prisma.branch.findUnique({
+        where: {
+          name,
+        },
+      });
+
+    if (existingBranch) {
+      return res.status(400).json({
+        message: "Branch already exists",
+      });
+    }
+
     const branch = await prisma.branch.create({
       data: {
         name,

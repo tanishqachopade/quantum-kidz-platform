@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { createClass } from "../../../services/classService";
+
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,55 +8,105 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Alert,
 } from "react-native";
 
+import {
+  getBranches,
+  createBranch,
+} from "../../../services/branchService";
+
+const CLASS_OPTIONS = [
+  "PLAYGROUP",
+  "NURSERY",
+  "JR_KG",
+  "SR_KG",
+];
+
 type Branch = {
+  id: string;
   name: string;
-  classes: string[];
+  classes: {
+  id: string;
+  type: string;
+}[];
 };
 
 export default function BranchManagementScreen() {
-  const [branches, setBranches] = useState<Branch[]>([
-    {
-      name: "Baner",
-      classes: ["Playgroup", "Nursery", "Jr KG", "Sr KG"],
-    },
-  ]);
+  const [branches, setBranches] = useState<Branch[]>([]);
 
   const [branchName, setBranchName] = useState("");
   const [selectedBranch, setSelectedBranch] = useState("");
-  const [className, setClassName] = useState("");
+  const [selectedClass, setSelectedClass] =
+  useState("PLAYGROUP");
 
-  const addBranch = () => {
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const loadBranches = async () => {
+    try {
+      const data = await getBranches();
+      setBranches(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    loadBranches();
+  }, []);
+
+  const addBranch = async () => {
     if (!branchName.trim()) return;
 
-    setBranches([
-      ...branches,
-      {
-        name: branchName,
-        classes: [],
-      },
-    ]);
+    try {
+      await createBranch(branchName);
 
-    setBranchName("");
+      setErrorMessage("");
+
+      setBranchName("");
+
+      await loadBranches();
+
+      Alert.alert("Success", "Branch created");
+    } catch (error: any) {
+      console.log(error);
+
+      setErrorMessage(
+        error.message || "Could not create branch"
+      );
+    }
   };
 
-  const addClass = () => {
-    if (!selectedBranch || !className.trim()) return;
+  const addClass = async () => {
+  if (!selectedBranch) {
+    Alert.alert(
+      "Select Branch",
+      "Please select a branch first."
+    );
+    return;
+  }
 
-    setBranches(
-      branches.map((branch) =>
-        branch.name === selectedBranch
-          ? {
-              ...branch,
-              classes: [...branch.classes, className],
-            }
-          : branch
-      )
+  try {
+    await createClass(
+      selectedBranch,
+      selectedClass
     );
 
-    setClassName("");
-  };
+    await loadBranches();
+
+    Alert.alert(
+      "Success",
+      "Class created"
+    );
+  } catch (error: any) {
+    Alert.alert(
+      "Error",
+      error.message
+    );
+  }
+};
+
+ 
 
   return (
     <ScrollView style={styles.container}>
@@ -74,6 +126,12 @@ export default function BranchManagementScreen() {
           style={styles.input}
         />
 
+        {errorMessage ? (
+          <Text style={styles.errorText}>
+            {errorMessage}
+          </Text>
+        ) : null}
+
         <TouchableOpacity
           style={styles.button}
           onPress={addBranch}
@@ -91,28 +149,44 @@ export default function BranchManagementScreen() {
 
         {branches.map((branch) => (
           <TouchableOpacity
-            key={branch.name}
+            key={branch.id}
             style={[
               styles.branchButton,
-              selectedBranch === branch.name &&
+              selectedBranch === branch.id &&
                 styles.selectedBranch,
             ]}
             onPress={() =>
-              setSelectedBranch(branch.name)
+              setSelectedBranch(branch.id)
             }
           >
-            <Text>
-              {branch.name}
-            </Text>
+            <Text>{branch.name}</Text>
           </TouchableOpacity>
         ))}
 
-        <TextInput
-          placeholder="Class Name"
-          value={className}
-          onChangeText={setClassName}
-          style={styles.input}
-        />
+        <Text
+  style={{
+    marginBottom: 10,
+    fontWeight: "600",
+  }}
+>
+  Select Class
+</Text>
+
+{CLASS_OPTIONS.map((option) => (
+  <TouchableOpacity
+    key={option}
+    style={[
+      styles.branchButton,
+      selectedClass === option &&
+        styles.selectedBranch,
+    ]}
+    onPress={() =>
+      setSelectedClass(option)
+    }
+  >
+    <Text>{option}</Text>
+  </TouchableOpacity>
+))}
 
         <TouchableOpacity
           style={styles.button}
@@ -131,19 +205,19 @@ export default function BranchManagementScreen() {
 
         {branches.map((branch) => (
           <View
-            key={branch.name}
+            key={branch.id}
             style={styles.branchCard}
           >
             <Text style={styles.branchName}>
               {branch.name}
             </Text>
 
-            {branch.classes.map((cls) => (
+            {branch.classes?.map((cls) => (
               <Text
-                key={cls}
+                key={cls.id}
                 style={styles.className}
               >
-                • {cls}
+                • {cls.type}
               </Text>
             ))}
           </View>
@@ -185,6 +259,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
+  },
+
+  errorText: {
+    color: "red",
+    marginBottom: 12,
+    fontWeight: "600",
   },
 
   button: {
