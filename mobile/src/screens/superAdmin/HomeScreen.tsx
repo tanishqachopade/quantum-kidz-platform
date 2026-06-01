@@ -1,9 +1,6 @@
-import { View, Text } from "react-native";
+import React from "react";
+import SuperAdminDashboard from "./SuperAdminDashboard";
 
-export default function SuperAdminHomeScreen() {
-  return (
-    <View>
-      <Text>Super Admin Dashboard</Text>
-    </View>
-  );
+export default function HomeScreen() {
+  return <SuperAdminDashboard />;
 }

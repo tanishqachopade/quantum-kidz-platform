@@ -14,17 +14,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 
 const ROLE_ROUTES: Record<string, string> = {
-  PARENT: "ParentHome",
-  TEACHER: "TeacherHome",
-  BRANCH_HEAD: "BranchHeadHome",
-  SUPER_ADMIN: "SuperAdminHome",
+  Parent: "ParentHome",
+  Teacher: "TeacherHome",
+  BranchHead: "BranchHeadHome",
+  SuperAdmin: "SuperAdminHome",
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  PARENT: "Parent",
-  TEACHER: "Teacher",
-  BRANCH_HEAD: "Branch Head",
-  SUPER_ADMIN: "Super Admin",
+  Parent: "Parent",
+  Teacher: "Teacher",
+  BranchHead: "Branch Head",
+  SuperAdmin: "Super Admin",
 };
 
 export default function OtpVerifyScreen({ route, navigation }: any) {
@@ -59,13 +59,22 @@ export default function OtpVerifyScreen({ route, navigation }: any) {
   };
 
   const handleVerify = () => {
-    const destination = ROLE_ROUTES[role];
+  console.log("ROLE =", role);
 
-    navigation.reset({
-      index: 0,
-      routes: [{ name: destination }],
-    });
-  };
+  const destination = ROLE_ROUTES[role];
+
+  console.log("DESTINATION =", destination);
+
+  if (!destination) {
+    alert(`No route found for role: ${role}`);
+    return;
+  }
+
+  navigation.reset({
+    index: 0,
+    routes: [{ name: destination }],
+  });
+};
 
   return (
     <KeyboardAvoidingView
@@ -151,7 +160,7 @@ export default function OtpVerifyScreen({ route, navigation }: any) {
 
           <View style={styles.devBadge}>
             <Text style={styles.devText}>
-              🚧 Dev Mode — Any 6 Digits Work
+              Dev Mode — Any 6 Digits Work
             </Text>
           </View>
 
