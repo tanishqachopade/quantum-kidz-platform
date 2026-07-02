@@ -48,12 +48,71 @@ export const createBranch = async (
       },
     });
 
+    const quantumBoard =
+  await prisma.board.findFirst({
+    where: {
+      type: "QUANTUM",
+    },
+  });
+
+if (!quantumBoard) {
+  await prisma.board.create({
+    data: {
+      title:
+        "Quantum Kidz Announcements",
+      type: "QUANTUM",
+    },
+  });
+}
+
+    await prisma.board.create({
+      data: {
+        title: `${name} Branch Board`,
+        type: "BRANCH",
+        branchId: branch.id,
+      },
+    });
+
     res.status(201).json(branch);
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       message: "Failed to create branch",
+    });
+  }
+};
+
+export const deleteBranch = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const branch = await prisma.branch.findUnique({
+      where: { id },
+    });
+
+    if (!branch) {
+      return res.status(404).json({
+        message: "Branch not found",
+      });
+    }
+
+    await prisma.branch.delete({
+      where: { id },
+    });
+
+    return res.json({
+      message: "Branch deleted successfully",
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to delete branch",
     });
   }
 };

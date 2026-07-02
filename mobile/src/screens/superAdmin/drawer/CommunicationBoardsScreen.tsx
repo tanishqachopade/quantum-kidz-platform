@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,78 +7,83 @@ import {
   Pressable,
 } from "react-native";
 
-import { BOARDS } from "../../../data/mockBoards";
+import { getBoards } from "../../../services/boardService";
+
+import ScreenHeader from "../../../components/ScreenHeader";
+
+import BoardCard from "../../../components/BoardCard";
+import Screen from "../../../components/Screen";
+
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
+type Board = {
+  id: string;
+  title: string;
+  type: string;
+};
 
 export default function CommunicationBoardsScreen({
   navigation,
 }: any) {
+  const [boards, setBoards] = useState<Board[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadBoards = async () => {
+    try {
+      const data = await getBoards();
+      setBoards(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+ useFocusEffect(
+  useCallback(() => {
+    loadBoards();
+  }, [])
+);
+
+  if (loading) {
+    return (
+      <Screen>
+        <Text>Loading boards...</Text>
+      </Screen>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>
-        Communication Boards
-      </Text>
+    <Screen>
+      <ScreenHeader
+  title="Communication Boards"
+/>
 
       <FlatList
-        data={BOARDS}
+        data={boards}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Pressable
-            style={styles.card}
-            onPress={() =>
-              navigation.navigate("BoardFeed", {
+          <BoardCard
+    title={item.title}
+    subtitle="Tap to open board"
+    onPress={() =>
+        navigation.navigate(
+            "BoardFeed",
+            {
                 boardId: item.id,
                 boardTitle: item.title,
-              })
             }
-          >
-            <Text style={styles.cardTitle}>
-              {item.title}
-            </Text>
-
-            <Text style={styles.cardSubtitle}>
-              Tap to open board
-            </Text>
-          </Pressable>
+        )
+    }
+/>
         )}
       />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F7FBFF",
-    padding: 20,
-  },
 
-  heading: {
-    fontSize: 28,
-    fontWeight: "800",
-    marginBottom: 20,
-    color: "#1A2332",
-  },
 
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 20,
-    marginBottom: 16,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A2332",
-  },
-
-  cardSubtitle: {
-    marginTop: 6,
-    color: "#7A8CA5",
-  },
 });

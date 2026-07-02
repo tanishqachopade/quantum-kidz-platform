@@ -1,4 +1,8 @@
-import { createClass } from "../../../services/classService";
+import { createClass, deleteClass } from "../../../services/classService";
+
+import ConfirmationModal from "../../../components/ConfirmationModal";
+
+import { MaterialIcons } from "@expo/vector-icons";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -14,6 +18,7 @@ import {
 import {
   getBranches,
   createBranch,
+  deleteBranch,
 } from "../../../services/branchService";
 
 const CLASS_OPTIONS = [
@@ -41,6 +46,21 @@ export default function BranchManagementScreen() {
   useState("PLAYGROUP");
 
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [deleteModalVisible, setDeleteModalVisible] =
+  useState(false);
+
+const [branchToDelete, setBranchToDelete] =
+  useState<Branch | null>(null);
+
+  const [classToDelete, setClassToDelete] =
+  useState<{
+    id: string;
+    type: string;
+  } | null>(null);
+
+const [deleteClassModalVisible, setDeleteClassModalVisible] =
+  useState(false);
 
   const loadBranches = async () => {
     try {
@@ -106,7 +126,58 @@ export default function BranchManagementScreen() {
   }
 };
 
- 
+const openDeleteClassModal = (
+  cls: {
+    id: string;
+    type: string;
+  }
+) => {
+  setClassToDelete(cls);
+  setDeleteClassModalVisible(true);
+};
+
+const confirmDeleteClass = async () => {
+  if (!classToDelete) return;
+
+  try {
+    await deleteClass(classToDelete.id);
+
+    await loadBranches();
+
+    setDeleteClassModalVisible(false);
+    setClassToDelete(null);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const openDeleteModal = (branch: Branch) => {
+  setBranchToDelete(branch);
+  setDeleteModalVisible(true);
+};
+
+const confirmDeleteBranch = async () => {
+  if (!branchToDelete) return;
+
+  try {
+    await deleteBranch(branchToDelete.id);
+
+    await loadBranches();
+
+    setDeleteModalVisible(false);
+    setBranchToDelete(null);
+
+    Alert.alert(
+      "Success",
+      "Branch deleted successfully."
+    );
+  } catch (error: any) {
+    Alert.alert(
+      "Error",
+      error.message || "Failed to delete branch."
+    );
+  }
+};
 
   return (
     <ScrollView style={styles.container}>
@@ -203,29 +274,108 @@ export default function BranchManagementScreen() {
           Existing Structure
         </Text>
 
-        {branches.map((branch) => (
-          <View
-            key={branch.id}
-            style={styles.branchCard}
-          >
-            <Text style={styles.branchName}>
-              {branch.name}
-            </Text>
+       {branches.map((branch) => (
+  <View
+    key={branch.id}
+    style={styles.branchCard}
+  >
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 6,
+      }}
+    >
+      <Text style={styles.branchName}>
+        {branch.name}
+      </Text>
 
-            {branch.classes?.map((cls) => (
-              <Text
-                key={cls.id}
-                style={styles.className}
-              >
-                • {cls.type}
-              </Text>
-            ))}
-          </View>
-        ))}
+      <TouchableOpacity
+        onPress={() => openDeleteModal(branch)}
+      >
+        <MaterialIcons
+  name="delete-outline"
+  size={24}
+  color="#E53935"
+/>
+      </TouchableOpacity>
+    </View>
+
+    {branch.classes?.map((cls) => (
+      <View
+  key={cls.id}
+  style={{
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginLeft: 12,
+    marginBottom: 6,
+  }}
+>
+  <Text>
+    • {cls.type}
+  </Text>
+
+  <TouchableOpacity
+    onPress={() =>
+      openDeleteClassModal(cls)
+    }
+  >
+    <MaterialIcons
+      name="delete-outline"
+      size={20}
+      color="#E53935"
+    />
+  </TouchableOpacity>
+</View>
+    ))}
+  </View>
+))}
       </View>
+
+
+           <ConfirmationModal
+        visible={deleteModalVisible}
+        icon="🗑️"
+        title="Delete Branch"
+        message={
+          branchToDelete
+            ? `Are you sure you want to permanently delete "${branchToDelete.name}"?\n\nThis will delete:\n\n• All classes\n• Branch board\n• Class boards\n• Announcements\n\nThis action cannot be undone.`
+            : ""
+        }
+        confirmText="Delete"
+        confirmColor="#E53935"
+        onCancel={() => {
+          setDeleteModalVisible(false);
+          setBranchToDelete(null);
+        }}
+        onConfirm={confirmDeleteBranch}
+      />
+
+      <ConfirmationModal
+        visible={deleteClassModalVisible}
+        icon="🗑️"
+        title="Delete Class"
+        message={
+          classToDelete
+            ? `Are you sure you want to permanently delete "${classToDelete.type}"?\n\nThis will delete:\n\n• Class Board\n• All announcements\n\nThis action cannot be undone.`
+            : ""
+        }
+        confirmText="Delete"
+        confirmColor="#E53935"
+        onCancel={() => {
+          setDeleteClassModalVisible(false);
+          setClassToDelete(null);
+        }}
+        onConfirm={confirmDeleteClass}
+      />
+
     </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {

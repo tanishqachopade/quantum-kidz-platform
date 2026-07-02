@@ -23,3 +23,20 @@ export async function createClass(
 
   return data;
 }
+
+export async function deleteClass(id: string) {
+  const response = await fetch(
+    `${API_URL}/classes/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message);
+  }
+
+  return data;
+}

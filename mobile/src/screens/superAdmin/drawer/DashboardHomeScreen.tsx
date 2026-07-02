@@ -1,4 +1,8 @@
-import React from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import {
   View,
   Text,
@@ -6,7 +10,39 @@ import {
   ScrollView,
 } from "react-native";
 
+import {
+  getDashboardStats,
+} from "../../../services/dashboardService";
+
+import Screen from "../../../components/Screen";
+
 export default function DashboardHomeScreen() {
+  const [stats, setStats] =
+    useState<any>(null);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      const data =
+        await getDashboardStats();
+
+      setStats(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  if (!stats) {
+    return (
+      <Screen>
+        <Text>Loading...</Text>
+      </Screen>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>
@@ -14,28 +50,40 @@ export default function DashboardHomeScreen() {
       </Text>
 
       <View style={styles.card}>
-        <Text style={styles.number}>5</Text>
+        <Text style={styles.number}>
+          {stats.totalBranches}
+        </Text>
+
         <Text style={styles.label}>
           Total Branches
         </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.number}>487</Text>
+        <Text style={styles.number}>
+          {stats.totalTeachers}
+        </Text>
+
         <Text style={styles.label}>
-          Total Students
+          Approved Teachers
         </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.number}>42</Text>
+        <Text style={styles.number}>
+          {stats.totalParents}
+        </Text>
+
         <Text style={styles.label}>
-          Total Teachers
+          Approved Parents
         </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.number}>3</Text>
+        <Text style={styles.number}>
+          {stats.pendingApprovals}
+        </Text>
+
         <Text style={styles.label}>
           Pending Approvals
         </Text>

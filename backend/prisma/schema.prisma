@@ -51,10 +51,10 @@ model Class {
   type      ClassType
 
   branchId  String
-  branch    Branch    @relation(fields: [branchId], references: [id])
+  branch    Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
   boards    Board[]
-  users User[]
+  users     User[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -66,14 +66,13 @@ model Board {
   id        String   @id @default(cuid())
 
   title     String
-
   type      BoardType
 
   branchId  String?
-  branch    Branch?  @relation(fields: [branchId], references: [id])
+  branch    Branch?  @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
   classId   String?
-  class     Class?   @relation(fields: [classId], references: [id])
+  class     Class?   @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   posts     Post[]
 
@@ -92,10 +91,10 @@ model User {
   approvalStatus ApprovalStatus   @default(PENDING)
 
   branchId       String?
-  branch         Branch?          @relation(fields: [branchId], references: [id])
+  branch         Branch?          @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
   classId        String?
-  class          Class?           @relation(fields: [classId], references: [id])
+  class          Class?           @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -105,12 +104,14 @@ model Post {
   id        String   @id @default(cuid())
 
   title     String
-
   content   String
 
-  boardId   String
-  board     Board    @relation(fields: [boardId], references: [id])
+  imageUrl  String?
 
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  // This will become a proper relation once we build authentication.
   authorId  String
 
   createdAt DateTime @default(now())

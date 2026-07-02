@@ -22,3 +22,17 @@ export async function createBranch(name: string) {
 
   return data;
 }
+
+export async function deleteBranch(id: string) {
+  const response = await fetch(`${API_URL}/branches/${id}`, {
+    method: "DELETE",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message);
+  }
+
+  return data;
+}

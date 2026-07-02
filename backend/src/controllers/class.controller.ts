@@ -39,3 +39,37 @@ export const createClass = async (
     });
   }
 };
+
+export const deleteClass = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    const existingClass =
+      await prisma.class.findUnique({
+        where: { id },
+      });
+
+    if (!existingClass) {
+      return res.status(404).json({
+        message: "Class not found",
+      });
+    }
+
+    await prisma.class.delete({
+      where: { id },
+    });
+
+    return res.json({
+      message: "Class deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Failed to delete class",
+    });
+  }
+};

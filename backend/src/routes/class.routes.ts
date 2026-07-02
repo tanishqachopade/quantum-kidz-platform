@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { createClass } from "../controllers/class.controller";
+import {
+  createClass,
+  deleteClass,
+} from "../controllers/class.controller";
 
 const router = Router();
 
 router.post("/", createClass);
+router.delete("/:id", deleteClass);
 
 export default router;
