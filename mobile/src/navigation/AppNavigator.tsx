@@ -9,6 +9,8 @@ import ParentHomeScreen from "../screens/parent/HomeScreen";
 import TeacherHomeScreen from "../screens/teacher/HomeScreen";
 import BranchHeadHomeScreen from "../screens/branchHead/HomeScreen";
 import SuperAdminHomeScreen from "../screens/superAdmin/HomeScreen";
+import BoardFeedScreen from "../screens/superAdmin/drawer/BoardFeedScreen";
+import PostFormScreen from "../screens/superAdmin/drawer/PostFormScreen.tsx";
 
 const Stack = createNativeStackNavigator();
 
@@ -52,6 +54,17 @@ export default function AppNavigator() {
           name="SuperAdminHome"
           component={SuperAdminHomeScreen}
         />
+
+        <Stack.Screen
+          name="BoardFeed"
+          component={BoardFeedScreen}
+        />
+
+        <Stack.Screen
+          name="PostForm"
+          component={PostFormScreen}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
